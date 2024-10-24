@@ -1,26 +1,24 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { ExpenseProvider } from './Context/ExpenseContext';
+import { TransactionForm } from './Components/TransactionForm';
+import { History } from './Components/History';
+import { AllTransactions } from './Components/AllTransactions';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ExpenseProvider>
+      <div className="min-h-screen bg-white text-gray-800">
+        <h1 className="text-center text-3xl font-bold py-5">Expense Tracker V2</h1>
+        <div className="max-w-4xl mx-auto grid grid-cols-2 gap-10">
+          <TransactionForm />
+          <div>
+            <AllTransactions />
+            <History />
+          </div>
+        </div>
+      </div>
+    </ExpenseProvider>
   );
-}
+};
 
 export default App;
