@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { useExpenseContext } from '../Context/ExpenseContext';
+import { Transaction } from '../Context/ExpenseContext';
 
 // form input types - what datatypes it takes
 type FormValues = {
@@ -9,41 +9,42 @@ type FormValues = {
     type: 'Income' | 'Expense';
 };
 
-export const TransactionForm: React.FC = () => {
-    const { addTransaction } = useExpenseContext();
+type TransactionFormProps = {
+    initialData?: Transaction;
+    onSubmit: (transaction: Transaction) => void;
+};
 
-
-    const { register, handleSubmit, reset } = useForm<FormValues>({   // useform hook initialized here - to handle form submissions and resetting
+export const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit }) => {
+    const { register, handleSubmit, reset, setValue } = useForm<FormValues>({
         defaultValues: {
-            name: '',
-            amount: 0,
-            type: 'Income',
+            name: initialData?.name || '', // Use initialData if present
+            amount: initialData?.amount ? Math.abs(initialData.amount) : 0,
+            type: initialData?.type || 'Income',
         },
     });
 
-
-    const onSubmit: SubmitHandler<FormValues> = (data) => {
-        const { name, amount, type } = data;
-
-        let parsedAmount; 
-        if (type === 'Income') {
-            parsedAmount = amount; // agr amount is positive to goes in normally 
-        } else {
-            parsedAmount = -amount; // agr type expense then negative sign to treat it as an expense
+    React.useEffect(() => {
+        if (initialData) {
+            setValue('name', initialData.name);
+            setValue('amount', Math.abs(initialData.amount));
+            setValue('type', initialData.type);
         }
+    }, [initialData, setValue]);
 
-        addTransaction({
-            id: Date.now(), // send a uniuque id with date
-            name, // name of transaction
-            amount: parsedAmount, // amount
-            type, // expense or income?
-        });
 
+    const submitHandler: SubmitHandler<FormValues> = (data) => {
+        const transaction = {
+            id: initialData?.id || Date.now(), // keep id if updating, else generate new id
+            name: data.name,
+            amount: data.type === 'Income' ? data.amount : -data.amount, 
+            type: data.type,
+        };
+        onSubmit(transaction); 
         reset(); 
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-5 rounded shadow">
+        <form onSubmit={handleSubmit(submitHandler)} className="bg-white p-5 rounded shadow">
             <div>
                 <label className="block text-lg font-semibold">Name</label>
                 <input
@@ -73,7 +74,7 @@ export const TransactionForm: React.FC = () => {
                 />
             </div>
             <button type="submit" className="bg-green-500 text-white p-2 mt-3 rounded w-full">
-                Submit
+                {initialData ? 'Update' : 'Submit'}
             </button>
         </form>
     );
