@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Transaction } from '../Context/ExpenseContext';
 
-// form input types - what datatypes it takes
 type FormValues = {
     name: string;
     amount: number;
@@ -17,13 +16,13 @@ type TransactionFormProps = {
 export const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, onSubmit }) => {
     const { register, handleSubmit, reset, setValue } = useForm<FormValues>({
         defaultValues: {
-            name: initialData?.name || '', // Use initialData if present
+            name: initialData?.name || '',
             amount: initialData?.amount ? Math.abs(initialData.amount) : 0,
             type: initialData?.type || 'Income',
         },
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (initialData) {
             setValue('name', initialData.name);
             setValue('amount', Math.abs(initialData.amount));
@@ -31,16 +30,15 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ initialData, o
         }
     }, [initialData, setValue]);
 
-
     const submitHandler: SubmitHandler<FormValues> = (data) => {
         const transaction = {
-            id: initialData?.id || Date.now(), // keep id if updating, else generate new id
+            id: initialData?.id || Date.now(),
             name: data.name,
-            amount: data.type === 'Income' ? data.amount : -data.amount, 
+            amount: data.type === 'Income' ? data.amount : -data.amount,
             type: data.type,
         };
-        onSubmit(transaction); 
-        reset(); 
+        onSubmit(transaction);  // This should trigger add or update
+        reset();
     };
 
     return (
